@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ChurnShield — Customer Churn Prediction Dashboard</title>
+  <meta name="description" content="AI-powered telecom customer churn prediction dashboard. Assess churn risk, explore insights, and get actionable retention strategies."/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- ======================================================
+       HEADER
+       ====================================================== -->
+  <header class="app-header animate-in">
+    <div class="header-brand">
+      <div class="brand-icon">🛡️</div>
+      <div class="brand-text">
+        <h1>ChurnShield</h1>
+        <p>Customer Churn Prediction · Telecom AI Platform</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="stat-badge tooltip" data-tip="Best model Test ROC-AUC">
+        <span class="stat-value">0.854</span>
+        <span class="stat-label">Best AUC</span>
+      </div>
+      <div class="stat-badge tooltip" data-tip="Dataset size">
+        <span class="stat-value">7,043</span>
+        <span class="stat-label">Customers</span>
+      </div>
+      <div class="stat-badge tooltip" data-tip="Observed churn rate in dataset">
+        <span class="stat-value">26.5%</span>
+        <span class="stat-label">Churn Rate</span>
+      </div>
+      <div class="stat-badge tooltip" data-tip="Algorithms evaluated">
+        <span class="stat-value">8</span>
+        <span class="stat-label">Models Tested</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================
+       KEY METRICS
+       ====================================================== -->
+  <div class="metrics-grid animate-in-delay-1">
+    <div class="glass-card metric-card blue">
+      <div class="metric-icon">🎯</div>
+      <div class="metric-value">85.4%</div>
+      <div class="metric-label">ROC-AUC Score</div>
+    </div>
+    <div class="glass-card metric-card cyan">
+      <div class="metric-icon">🔍</div>
+      <div class="metric-value">78.9%</div>
+      <div class="metric-label">Recall (Churn)</div>
+    </div>
+    <div class="glass-card metric-card purple">
+      <div class="metric-icon">⚡</div>
+      <div class="metric-value">68.1%</div>
+      <div class="metric-label">Precision</div>
+    </div>
+    <div class="glass-card metric-card amber">
+      <div class="metric-icon">📊</div>
+      <div class="metric-value">73.1%</div>
+      <div class="metric-label">F1-Score</div>
+    </div>
+  </div>
+
+  <!-- ======================================================
+       PREDICTION FORM + RESULT GAUGE
+       ====================================================== -->
+  <div class="main-grid animate-in-delay-2">
+
+    <!-- FORM -->
+    <div class="glass-card prediction-form-card">
+      <div class="section-title">
+        <div class="section-icon" style="background: linear-gradient(135deg, #3d85f5, #8b5cf6);">🔮</div>
+        <h2>Customer Profile — Churn Predictor</h2>
+      </div>
+
+      <!-- Demographics -->
+      <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; font-weight: 600;">👤 Demographics</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="gender">Gender</label>
+          <select id="gender">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="senior">Senior Citizen</label>
+          <select id="senior">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="partner">Has Partner</label>
+          <select id="partner">
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="dependents">Has Dependents</label>
+          <select id="dependents">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tenure & Contract -->
+      <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 18px 0 12px; font-weight: 600;">📋 Account Info</p>
+      <div class="form-grid">
+        <div class="slider-wrapper">
+          <div class="slider-header">
+            <label for="tenure">Tenure (months)</label>
+            <span class="slider-value" id="tenure-val">12</span>
+          </div>
+          <input type="range" id="tenure" min="0" max="72" value="12" step="1"/>
+        </div>
+        <div class="form-group">
+          <label for="contract">Contract Type</label>
+          <select id="contract">
+            <option value="Month-to-month">Month-to-month</option>
+            <option value="One year">One year</option>
+            <option value="Two year">Two year</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="paperless">Paperless Billing</label>
+          <select id="paperless">
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="payment">Payment Method</label>
+          <select id="payment">
+            <option value="Electronic check">Electronic check</option>
+            <option value="Mailed check">Mailed check</option>
+            <option value="Bank transfer (automatic)">Bank transfer (auto)</option>
+            <option value="Credit card (automatic)">Credit card (auto)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Services -->
+      <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 18px 0 12px; font-weight: 600;">📡 Services</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="phone">Phone Service</label>
+          <select id="phone">
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="multilines">Multiple Lines</label>
+          <select id="multilines">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="No phone service">No phone service</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="internet">Internet Service</label>
+          <select id="internet">
+            <option value="Fiber optic">Fiber optic</option>
+            <option value="DSL">DSL</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="security">Online Security</label>
+          <select id="security">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="No internet service">No internet service</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="backup">Online Backup</label>
+          <select id="backup">
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="No internet service">No internet service</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="device">Device Protection</label>
+          <select id="device">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="No internet service">No internet service</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="techsupport">Tech Support</label>
+          <select id="techsupport">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="No internet service">No internet service</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="streamingtv">Streaming TV</label>
+          <select id="streamingtv">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="No internet service">No internet service</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="streamingmovies">Streaming Movies</label>
+          <select id="streamingmovies">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="No internet service">No internet service</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Charges -->
+      <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 18px 0 12px; font-weight: 600;">💳 Charges</p>
+      <div class="form-grid">
+        <div class="slider-wrapper">
+          <div class="slider-header">
+            <label for="monthly">Monthly Charges ($)</label>
+            <span class="slider-value" id="monthly-val">$64.76</span>
+          </div>
+          <input type="range" id="monthly" min="18" max="119" value="64" step="0.5"
+                 data-prefix="$"/>
+        </div>
+        <div class="slider-wrapper">
+          <div class="slider-header">
+            <label for="total">Total Charges ($)</label>
+            <span class="slider-value" id="total-val">$775.00</span>
+          </div>
+          <input type="range" id="total" min="18" max="8685" value="775" step="5"
+                 data-prefix="$"/>
+        </div>
+      </div>
+
+      <div class="predict-btn-wrapper">
+        <button class="btn-predict" id="predict-btn">🔮 Predict Churn Risk</button>
+      </div>
+    </div>
+
+    <!-- RESULT PANEL -->
+    <div id="result-section" class="glass-card risk-result-card">
+      <div class="section-title">
+        <div class="section-icon" style="background: linear-gradient(135deg, #06d6a0, #3d85f5);">📈</div>
+        <h2>Churn Risk Assessment</h2>
+      </div>
+
+      <!-- SVG Gauge -->
+      <div class="gauge-container">
+        <svg id="gauge-svg" class="gauge-svg" viewBox="0 0 240 140">
+          <!-- Background arc: semicircle -->
+          <path class="gauge-bg"
+                d="M 20 130 A 100 100 0 0 1 220 130"
+                stroke="rgba(255,255,255,0.07)" fill="none" stroke-width="16" stroke-linecap="round"/>
+          <!-- Fill arc -->
+          <path id="gauge-fill" class="gauge-fill"
+                d="M 20 130 A 100 100 0 0 1 220 130"
+                fill="none" stroke="#3d85f5" stroke-width="16" stroke-linecap="round"
+                stroke-dasharray="310" stroke-dashoffset="310"/>
+          <!-- Text -->
+          <text id="gauge-text-main" class="gauge-text-main" x="120" y="118">0%</text>
+          <text id="gauge-text-sub" class="gauge-text-sub" x="120" y="136">Make a prediction</text>
+        </svg>
+      </div>
+
+      <!-- Risk Badge -->
+      <div id="risk-badge" class="risk-badge low" style="opacity: 0.4;">
+        <span>⬜</span> Awaiting Input
+      </div>
+
+      <!-- Alert Banner -->
+      <div id="alert-banner" class="alert-banner success" style="display:none;">
+        Run the predictor to see churn risk.
+      </div>
+
+      <!-- Risk Factors -->
+      <div class="risk-factors" style="width: 100%;">
+        <p style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 10px;">Top Risk Factors</p>
+        <div id="risk-factors">
+          <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px;">
+            Submit a customer profile to see risk factors
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================
+       EDA CHARTS
+       ====================================================== -->
+  <div class="section-title animate-in-delay-3">
+    <div class="section-icon" style="background: linear-gradient(135deg, #06d6a0, #3d85f5);">📊</div>
+    <h2>Exploratory Data Analysis</h2>
+  </div>
+
+  <div class="charts-grid">
+    <div class="glass-card chart-card">
+      <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-secondary);">Churn Distribution</h3>
+      <div class="chart-container">
+        <canvas id="churn-dist-chart"></canvas>
+      </div>
+    </div>
+    <div class="glass-card chart-card">
+      <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-secondary);">Churn Rate by Contract Type</h3>
+      <div class="chart-container">
+        <canvas id="contract-churn-chart"></canvas>
+      </div>
+    </div>
+    <div class="glass-card chart-card">
+      <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-secondary);">Churn Rate by Tenure</h3>
+      <div class="chart-container">
+        <canvas id="tenure-churn-chart"></canvas>
+      </div>
+    </div>
+    <div class="glass-card chart-card">
+      <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-secondary);">Churn Rate by Monthly Charges</h3>
+      <div class="chart-container">
+        <canvas id="charges-churn-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================
+       FEATURE IMPORTANCE
+       ====================================================== -->
+  <div class="glass-card importance-card">
+    <div class="section-title">
+      <div class="section-icon" style="background: linear-gradient(135deg, #8b5cf6, #3d85f5);">🔑</div>
+      <h2>Feature Importance — XGBoost Model</h2>
+    </div>
+    <div id="feature-importance-list" class="importance-list"></div>
+  </div>
+
+  <!-- ======================================================
+       KEY INSIGHTS
+       ====================================================== -->
+  <div class="section-title">
+    <div class="section-icon" style="background: linear-gradient(135deg, #ffa502, #ff4757);">💡</div>
+    <h2>Key Business Insights</h2>
+  </div>
+
+  <div class="insights-grid">
+    <div class="insight-card">
+      <div class="insight-icon">📄</div>
+      <div class="insight-title">Month-to-Month = Highest Risk</div>
+      <div class="insight-text">42.7% of month-to-month customers churn vs only 2.8% of 2-year contract holders. Contract type is the single most powerful predictor.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">⏳</div>
+      <div class="insight-title">New Customers at Greatest Risk</div>
+      <div class="insight-text">48% of customers in their first 6 months churn. Onboarding experience and early value delivery are critical retention levers.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">💸</div>
+      <div class="insight-title">High Charges Drive Attrition</div>
+      <div class="insight-text">Customers paying >$95/month have a 44.6% churn rate. Price sensitivity requires targeted retention incentives for high-value customers.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">🔒</div>
+      <div class="insight-title">Security Services Reduce Churn</div>
+      <div class="insight-text">Customers with Tech Support and Online Security churn significantly less. Bundling these services increases perceived value and stickiness.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">💳</div>
+      <div class="insight-title">Electronic Check Users Churn More</div>
+      <div class="insight-text">Electronic check payment correlates with 45% higher churn. Migrating customers to auto-payment methods reduces friction and improves retention.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">🌐</div>
+      <div class="insight-title">Fiber Optic Customers at Risk</div>
+      <div class="insight-text">Despite being a premium service, Fiber Optic customers show high churn — likely due to price. Competitive pricing and quality assurance are key.</div>
+    </div>
+  </div>
+
+  <!-- ======================================================
+       BUSINESS RECOMMENDATIONS
+       ====================================================== -->
+  <div class="glass-card recommendations-card">
+    <div class="section-title">
+      <div class="section-icon" style="background: linear-gradient(135deg, #2ed573, #06d6a0);">🎯</div>
+      <h2>Strategic Retention Recommendations</h2>
+    </div>
+    <ul class="rec-list">
+      <li>
+        <span class="rec-icon">🎁</span>
+        <span><strong>Incentivize contract upgrades:</strong> Offer discounts or perks to month-to-month customers who upgrade to annual or biennial contracts. Even a 10% shift could dramatically reduce churn.</span>
+      </li>
+      <li>
+        <span class="rec-icon">🚀</span>
+        <span><strong>Boost onboarding for new customers:</strong> Implement a structured 90-day onboarding journey with check-ins, tutorials, and early value demonstrations. Target 0–6 month cohort proactively.</span>
+      </li>
+      <li>
+        <span class="rec-icon">💰</span>
+        <span><strong>Loyalty discounts for high-paying customers:</strong> Customers with >$80/month charges are at elevated risk. Offer loyalty rewards, price-lock guarantees, or service upgrades to retain them.</span>
+      </li>
+      <li>
+        <span class="rec-icon">🛡️</span>
+        <span><strong>Bundle Tech Support + Online Security:</strong> These services strongly predict retention. Create discounted bundles and proactively offer them to customers without them, especially new subscribers.</span>
+      </li>
+      <li>
+        <span class="rec-icon">🔄</span>
+        <span><strong>Migrate Electronic Check users to auto-pay:</strong> Offer incentives (bill credit, free month) for switching to auto-payment. This reduces churn and improves cash flow predictability.</span>
+      </li>
+      <li>
+        <span class="rec-icon">📱</span>
+        <span><strong>Deploy real-time churn scoring:</strong> Integrate this model into your CRM to flag high-risk customers daily. Enable proactive outreach from customer success teams before churn happens.</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ======================================================
+       MODEL PERFORMANCE TABLE
+       ====================================================== -->
+  <div class="glass-card performance-card">
+    <div class="section-title">
+      <div class="section-icon" style="background: linear-gradient(135deg, #3d85f5, #06d6a0);">🤖</div>
+      <h2>Model Performance Comparison</h2>
+    </div>
+    <table class="perf-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>ROC-AUC ↑</th>
+          <th>Recall ↑</th>
+          <th>Precision ↑</th>
+          <th>F1-Score ↑</th>
+        </tr>
+      </thead>
+      <tbody id="model-tbody">
+        <!-- JS populated -->
+      </tbody>
+    </table>
+    <div class="alert-banner success" style="margin-top: 16px;">
+      🏆 XGBoost selected as best model after hyperparameter tuning with RandomizedSearchCV (50 iterations, 5-fold CV). SMOTE applied to balance class distribution.
+    </div>
+  </div>
+
+  <!-- ======================================================
+       FOOTER
+       ====================================================== -->
+  <footer class="app-footer">
+    <p>ChurnShield · Telecom Customer Churn Prediction Platform · Built with XGBoost, scikit-learn, SMOTE & Chart.js</p>
+    <p style="margin-top: 6px;">Dataset: IBM Telco Customer Churn · 7,043 customers · 21 features · 26.5% churn rate</p>
+  </footer>
+
+</div><!-- /app-container -->
+
+<script src="js/app.js"></script>
+</body>
+</html>
